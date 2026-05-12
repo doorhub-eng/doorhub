@@ -52,6 +52,12 @@
 
     <!-- Контент -->
     <main class="container">
+        <!-- Описание сайта -->
+        <div class="site-description" style="text-align: center; margin-bottom: 30px; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 1px solid #333;">
+            <h1 style="font-size: 24px; margin-bottom: 10px; color: #fff;">DOORHUB</h1>
+            <p style="color: #aaa; font-size: 14px; line-height: 1.5;">твой главный источник актуальной инфы. свежие новости, авторские статьи и годная аналитика в одном месте. никакого лишнего инфошума — только суть.</p>
+        </div>
+
         <div class="feed-header">
             <h2>Последние записи</h2>
             <div class="filters">
@@ -191,8 +197,8 @@
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Загрузить обложку (опционально)</label>
-                        <input type="file" id="post-image" accept="image/*">
+                        <label>Загрузить медиа (фото/видео)</label>
+                        <input type="file" id="post-image" accept="image/*,video/mp4,video/webm,video/ogg">
                     </div>
                 </div>
 
@@ -216,6 +222,52 @@
                 <div class="form-actions">
                     <button type="button" class="btn btn-outline" onclick="closeModal('createPostModal')">Отмена</button>
                     <button type="submit" class="btn btn-primary">Опубликовать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Редактирование поста -->
+    <div id="editPostModal" class="modal">
+        <div class="modal-content large">
+            <span class="close" onclick="closeModal('editPostModal')">&times;</span>
+            <h2>Редактировать публикацию</h2>
+            <form id="editPostForm" onsubmit="handleEditPost(event)">
+                <div class="input-group">
+                    <label>Заголовок поста</label>
+                    <input type="text" id="edit-post-title" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Категория</label>
+                        <select id="edit-post-category" onchange="toggleEditBoostyField(this.value)">
+                            <option value="Новости">Новости</option>
+                            <option value="Статьи">Статьи</option>
+                            <option value="Обзоры">Обзоры</option>
+                            <option value="Разное">Разное</option>
+                            <option value="18+">18+ (Платный)</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Изменить медиа (фото/видео)</label>
+                        <input type="file" id="edit-post-image" accept="image/*,video/mp4,video/webm,video/ogg">
+                    </div>
+                </div>
+
+                <div class="input-group hidden" id="edit-boosty-link-group" style="margin-bottom: 15px;">
+                    <label>Ссылка на пост в Boosty</label>
+                    <input type="url" id="edit-post-boosty-link">
+                </div>
+
+                <div class="input-group">
+                    <label>Содержимое</label>
+                    <textarea id="edit-post-content" rows="8" required></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('editPostModal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
                 </div>
             </form>
         </div>
@@ -279,9 +331,11 @@
                 <h3 style="margin-bottom: 10px;">Все пользователи</h3>
                 <div id="admin-users-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
                 
+                <h3 style="margin-bottom: 10px;">Редакторы</h3>
+                <div id="admin-editors-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
+                
                 <h3 style="margin-bottom: 10px;">Забаненные</h3>
                 <div id="admin-banned-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
-
             </div>
 
             <p class="admin-notice">Управление контентом доступно прямо из ленты. Чтобы закрепить или удалить пост, используйте иконки в правом верхнем углу карточки.</p>
@@ -305,6 +359,7 @@
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button id="btn-user-ban" onclick="executeUserAction('ban')" class="btn" style="background: transparent; border: 1px solid #ff4444; color: #ff4444;">Забанить</button>
                 <button id="btn-user-mute" onclick="executeUserAction('mute')" class="btn" style="background: transparent; border: 1px solid #ffaa00; color: #ffaa00;">Выдать мут</button>
+                <button id="btn-user-editor" onclick="executeUserAction('editor')" class="btn" style="background: transparent; border: 1px solid #00cc66; color: #00cc66;">Дать права редактора</button>
                 <button onclick="executeUserAction('delete')" class="btn" style="background: #ff4444; color: #fff;">Удалить аккаунт</button>
             </div>
         </div>

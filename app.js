@@ -134,13 +134,22 @@ window.renderPosts = function() {
     const sortedPosts = [...filtered].sort((a, b) => (b.isPinned === true) - (a.isPinned === true));
 
     sortedPosts.forEach(post => {
-        const imageHtml = post.image ? `<img src="${post.image}" class="post-image" alt="cover">` : '<div class="post-image" style="background:#111; display:flex; align-items:center; justify-content:center; color:#555;"><i class="fas fa-image fa-3x"></i></div>';
+        let imageHtml = '<div class="post-image" style="background:#111; display:flex; align-items:center; justify-content:center; color:#555;"><i class="fas fa-image fa-3x"></i></div>';
+        if (post.image) {
+            if (post.image.startsWith('data:video')) {
+                imageHtml = `<video src="${post.image}" class="post-image" controls style="max-height: 400px; object-fit: contain; background: #000;"></video>`;
+            } else {
+                imageHtml = `<img src="${post.image}" class="post-image" alt="cover">`;
+            }
+        }
         
         let adminHtml = '';
-        if (currentUserDoc.role === 'admin') {
+        if (currentUserDoc.role === 'admin' || currentUserDoc.role === 'editor') {
             const pinIcon = post.isPinned ? 'fa-star' : 'fa-thumbtack';
+            const editBtn = currentUserDoc.role === 'admin' ? `<button onclick="openEditPost('${post.id}')" style="background:#000; border:1px solid #00cc66; color:#00cc66; padding:8px 12px; cursor:pointer; transition:0.2s;" title="Редактировать"><i class="fas fa-pencil-alt"></i></button>` : '';
             adminHtml = `
                 <div style="position:absolute; top:10px; right:10px; display:flex; gap:5px; z-index:10;">
+                    ${editBtn}
                     <button onclick="togglePin('${post.id}', ${post.isPinned})" style="background:#000; border:1px solid #fff; color:${post.isPinned ? '#fff' : '#888'}; padding:8px 12px; cursor:pointer; transition:0.2s;" title="Закрепить"><i class="fas ${pinIcon}"></i></button>
                     <button onclick="deletePost('${post.id}')" style="background:#000; border:1px solid #ff4444; color:#ff4444; padding:8px 12px; cursor:pointer; transition:0.2s;" title="Удалить"><i class="fas fa-trash"></i></button>
                 </div>
@@ -161,7 +170,7 @@ window.renderPosts = function() {
         }).join('');
 
         const isAdult = post.category === '18+';
-        const hasAccess = currentUserDoc.role === 'admin';
+        const hasAccess = currentUserDoc.role === 'admin' || currentUserDoc.role === 'editor';
         let blurClass = '';
         let adultOverlay = '';
 
@@ -256,6 +265,63 @@ window.togglePin = async function(postId, currentStatus) {
 window.deletePost = async function(postId) {
     if(confirm('Удалить пост навсегда?')) {
         await deleteDoc(doc(db, "posts", postId));
+    }
+}
+
+let currentEditingPostId = null;
+
+window.openEditPost = function(postId) {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return;
+    currentEditingPostId = postId;
+    document.getElementById('edit-post-title').value = post.title;
+    document.getElementById('edit-post-category').value = post.category;
+    document.getElementById('edit-post-content').value = post.content;
+    document.getElementById('edit-post-boosty-link').value = post.boostyLink || '';
+    toggleEditBoostyField(post.category);
+    openModal('editPostModal');
+}
+
+window.toggleEditBoostyField = function(val) {
+    const group = document.getElementById('edit-boosty-link-group');
+    if (val === '18+') {
+        group.classList.remove('hidden');
+    } else {
+        group.classList.add('hidden');
+    }
+}
+
+window.handleEditPost = async function(event) {
+    event.preventDefault();
+    if (!currentEditingPostId) return;
+    
+    const title = document.getElementById('edit-post-title').value;
+    const category = document.getElementById('edit-post-category').value;
+    const content = document.getElementById('edit-post-content').value;
+    const boostyLink = document.getElementById('edit-post-boosty-link').value;
+    const fileInput = document.getElementById('edit-post-image');
+    
+    try {
+        const updateData = { title, category, content, boostyLink };
+        
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                updateData.image = e.target.result;
+                await updateDoc(doc(db, "posts", currentEditingPostId), updateData);
+                closeModal('editPostModal');
+                currentEditingPostId = null;
+                event.target.reset();
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            await updateDoc(doc(db, "posts", currentEditingPostId), updateData);
+            closeModal('editPostModal');
+            currentEditingPostId = null;
+            event.target.reset();
+        }
+    } catch(e) {
+        alert('Ошибка при сохранении: ' + e.message);
     }
 }
 
@@ -460,6 +526,9 @@ function updateAuthUI() {
         if (currentUserDoc.role === 'admin') {
             if(adminFab) adminFab.classList.remove('hidden');
             if(adminPanelBtn) adminPanelBtn.classList.remove('hidden');
+        } else if (currentUserDoc.role === 'editor') {
+            if(adminFab) adminFab.classList.remove('hidden');
+            if(adminPanelBtn) adminPanelBtn.classList.add('hidden');
         } else {
             if(adminFab) adminFab.classList.add('hidden');
             if(adminPanelBtn) adminPanelBtn.classList.add('hidden');
@@ -524,7 +593,7 @@ window.toggleBoostyField = function(val) {
 // Создание поста
 window.handleCreatePost = async function(event) {
     event.preventDefault();
-    if(!currentUserDoc) return;
+    if(!currentUserDoc || (currentUserDoc.role !== 'admin' && currentUserDoc.role !== 'editor')) return;
 
     const title = document.getElementById('post-title').value;
     const category = document.getElementById('post-category').value;
@@ -588,6 +657,20 @@ window.openAdminUserAction = function(uid, name) {
         banBtn.style.color = "#ff4444";
         banBtn.style.borderColor = "#ff4444";
     }
+
+    const editorBtn = document.getElementById('btn-user-editor');
+    if (editorBtn) {
+        if (user && user.role === 'editor') {
+            editorBtn.textContent = "Снять права редактора";
+            editorBtn.style.color = "#aaa";
+            editorBtn.style.borderColor = "#aaa";
+        } else {
+            editorBtn.textContent = "Дать права редактора";
+            editorBtn.style.color = "#00cc66";
+            editorBtn.style.borderColor = "#00cc66";
+        }
+        editorBtn.style.display = (user && user.role === 'admin') ? 'none' : 'block';
+    }
     
     openModal('userActionModal');
 }
@@ -601,6 +684,9 @@ window.executeUserAction = async function(action) {
         await updateDoc(doc(db, "users", user.uid), { isBanned: !user.isBanned });
     } else if (action === 'mute') {
         await updateDoc(doc(db, "users", user.uid), { isMuted: !user.isMuted });
+    } else if (action === 'editor') {
+        const newRole = user.role === 'editor' ? 'user' : 'editor';
+        await updateDoc(doc(db, "users", user.uid), { role: newRole });
     } else if (action === 'delete') {
         if(confirm('Точно удалить аккаунт из базы?')) {
             await deleteDoc(doc(db, "users", user.uid));
@@ -612,25 +698,31 @@ window.executeUserAction = async function(action) {
 function renderAdminLists() {
     const allList = document.getElementById('admin-users-list');
     const banList = document.getElementById('admin-banned-list');
-    if(!allList || !banList) return;
+    const editorsList = document.getElementById('admin-editors-list');
+    if(!allList || !banList || !editorsList) return;
     
     allList.innerHTML = '';
     banList.innerHTML = '';
+    editorsList.innerHTML = '';
     
     allUsersLocal.forEach(u => {
         // Скрываем только самого главного создателя из списка админки, остальных показываем
         if (u.email === 'doorblack@doorhub.app') return;
         
         const muteBadge = u.isMuted ? `<span style="background:#ffaa00;color:#000;font-size:10px;padding:2px 5px;font-weight:bold;margin-left:5px;">МУТ</span>` : '';
+        const roleBadge = u.role === 'editor' ? `<span style="background:#00cc66;color:#000;font-size:10px;padding:2px 5px;font-weight:bold;margin-left:5px;">РЕДАКТОР</span>` : '';
+        
         const html = `
             <div style="display:flex; justify-content:space-between; align-items:center; background:#1a1a1a; padding:10px; border:1px solid #333;">
-                <div>${u.name} <span style="color:#888;font-size:12px;">(${u.email})</span> ${muteBadge}</div>
+                <div>${u.name} <span style="color:#888;font-size:12px;">(${u.email})</span> ${muteBadge} ${roleBadge}</div>
                 <button onclick="openAdminUserAction('${u.uid}', '${u.name}')" style="background:none; border:none; color:#fff; cursor:pointer; padding:5px;"><i class="fas fa-ellipsis-v"></i></button>
             </div>
         `;
         
         if (u.isBanned) {
             banList.innerHTML += html;
+        } else if (u.role === 'editor') {
+            editorsList.innerHTML += html;
         } else {
             allList.innerHTML += html;
         }

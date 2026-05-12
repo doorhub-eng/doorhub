@@ -257,8 +257,8 @@ window.deletePost = async function(postId) {
 window.handleRegister = async function(event) {
     event.preventDefault();
     const name = document.getElementById('reg-name').value.trim();
-    let identifier = event.target.querySelector('input[type="text"]:nth-of-type(2), input[type="email"]').value.trim();
-    const password = event.target.querySelectorAll('input[type="password"]')[0].value;
+    let identifier = document.getElementById('reg-identifier').value.trim();
+    const password = document.getElementById('reg-password').value;
     
     let email = identifier.includes('@') ? identifier : `${identifier.replace(/\s+/g, '')}@doorhub.app`;
     email = email.toLowerCase();

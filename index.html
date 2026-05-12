@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOORHUB - Новости</title>
+    <title>Блог / Платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -65,6 +65,15 @@
             <!-- Посты будут рендериться здесь -->
         </div>
     </main>
+
+    <!-- Футер -->
+    <footer style="text-align: center; padding: 20px; border-top: 1px solid #333; margin-top: 40px; color: #888; font-size: 14px;">
+        <p style="margin-bottom: 10px;">&copy; 2026 DOORHUB. Все права защищены.</p>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <a href="https://t.me/door_hub" target="_blank" style="color: #0088cc; text-decoration: none; font-size: 20px;"><i class="fab fa-telegram"></i></a>
+            <a href="https://www.youtube.com/@door_hub" target="_blank" style="color: #ff0000; text-decoration: none; font-size: 20px;"><i class="fab fa-youtube"></i></a>
+        </div>
+    </footer>
 
     <!-- Админская кнопка "+" -->
     <button class="admin-fab hidden" id="admin-fab" onclick="openModal('createPostModal')">
@@ -279,6 +288,15 @@
         </div>
     </div>
 
+    <!-- Окно бана -->
+    <div id="bannedModal" class="modal" style="z-index: 9999; background-color: rgba(0,0,0,0.95);">
+        <div class="modal-content" style="text-align: center; border: 2px solid #ff4444;">
+            <h2 style="color: #ff4444; font-size: 32px; margin-bottom: 20px;">ВЫ ЗАБАНЕНЫ</h2>
+            <p style="font-size: 18px; margin-bottom: 30px;">Доступ к DOORHUB ограничен администрацией.</p>
+            <button onclick="logoutAndCloseBan()" class="btn">Выйти из аккаунта</button>
+        </div>
+    </div>
+
     <!-- Окно управления пользователем (Админ) -->
     <div id="userActionModal" class="modal">
         <div class="modal-content" style="max-width: 300px; text-align: center;">
@@ -293,14 +311,5 @@
     </div>
 
     <script type="module" src="app.js"></script>
-    <footer>
-    <div class="footer-content">
-        <p>&copy; 2026 DOORHUB. Все права защищены</p>
-        <div class="social-links">
-            <a href="https://t.me/door_hub" target="_blank">Telegram</a>
-            <a href="https://www.youtube.com/@door_hub" target="_blank">YouTube</a>
-        </div>
-    </div>
-    </footer>
 </body>
 </html>

@@ -599,25 +599,3 @@ input:focus, textarea:focus, select:focus {
         gap: 0;
     }
 }
-
-footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 50px;
-    background-color: #0a0a0a;
-    border-top: 1px solid #222;
-}
-.footer-content p {
-    color: #888;
-    font-size: 14px;
-    margin-bottom: 10px;
-}
-.social-links a {
-    color: #fff;
-    text-decoration: none;
-    margin: 0 10px;
-    font-weight: bold;
-}
-.social-links a:hover {
-    color: #aaa;
-}

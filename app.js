@@ -72,6 +72,12 @@ onSnapshot(collection(db, "users"), (snapshot) => {
 window.openModal = function(id) {
     const modal = document.getElementById(id);
     if(!modal) return;
+    
+    if (id === 'adminPanelModal') {
+        renderAdminLists();
+        if (typeof updateAdminStats === 'function') updateAdminStats();
+    }
+    
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('active'), 10);
 }
@@ -419,6 +425,11 @@ window.skipAvatarStep = function() {
     closeModal('avatarStepModal');
 }
 
+window.logoutAndCloseBan = function() {
+    closeModal('bannedModal');
+    logout();
+}
+
 // UI
 function updateAuthUI() {
     const sidebarGuest = document.getElementById('sidebar-guest');
@@ -430,8 +441,8 @@ function updateAuthUI() {
 
     if (currentUserDoc) {
         if(currentUserDoc.isBanned) {
-            alert("Ваш аккаунт забанен.");
-            logout();
+            document.getElementById('bannedModal').style.display = 'flex';
+            document.getElementById('posts-container').innerHTML = '';
             return;
         }
 
@@ -607,7 +618,8 @@ function renderAdminLists() {
     banList.innerHTML = '';
     
     allUsersLocal.forEach(u => {
-        if (u.role === 'admin') return;
+        // Скрываем только самого главного создателя из списка админки, остальных показываем
+        if (u.email === 'doorblack@doorhub.app') return;
         
         const muteBadge = u.isMuted ? `<span style="background:#ffaa00;color:#000;font-size:10px;padding:2px 5px;font-weight:bold;margin-left:5px;">МУТ</span>` : '';
         const html = `

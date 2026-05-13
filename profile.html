@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOORHUB - Кабинет</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="style.css?v=3">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="logo">DOORHUB</a>
+    <div id="nav-auth-state"></div>
+  </nav>
+
+  <main class="container profile-container">
+    <div class="sidebar">
+      <h3>Настройки аккаунта</h3>
+      <div class="profile-card">
+        <img id="prof-avatar-preview" src="https://via.placeholder.com/100" alt="Avatar">
+        <input type="file" id="prof-avatar-upload" accept="image/*" class="file-input" style="display:none;">
+        <button onclick="document.getElementById('prof-avatar-upload').click()" class="btn-outline btn-full" style="margin-bottom:20px;">Сменить фото</button>
+        
+        <!-- Скрытые поля чтобы логика JS не падала -->
+        <input type="hidden" id="prof-nickname" value="">
+        <input type="hidden" id="prof-phone" value="">
+        <button id="btn-save-profile" style="display:none;"></button>
+        
+        <button id="btn-logout" class="btn-outline btn-full">Выйти</button>
+        <button id="btn-delete-acc" class="btn-red btn-full">Удалить аккаунт</button>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>Мои посты</h3>
+        <button onclick="document.getElementById('post-modal').style.display='flex'" class="btn-green" style="font-size: 16px; padding: 12px 25px;">+ Добавить пост</button>
+      </div>
+      
+      <!-- Модальное окно для создания поста -->
+      <div id="post-modal" class="modal">
+        <div class="modal-content">
+          <span class="close-modal" onclick="document.getElementById('post-modal').style.display='none'">&times;</span>
+          <h3 style="margin-bottom: 20px;">Создать пост</h3>
+          <input type="text" id="post-title" placeholder="Заголовок">
+          <select id="post-category">
+            <option value="Новость">Новость</option>
+            <option value="Статья">Статья</option>
+            <option value="Вопрос">Вопрос</option>
+          </select>
+          <textarea id="post-content" placeholder="Текст поста..." rows="5"></textarea>
+          <label class="file-label" style="display:block; margin-bottom: 5px;">Прикрепить картинку:</label>
+          <input type="file" id="post-image" accept="image/*" class="file-input">
+          <button id="btn-create-post" class="btn-green btn-full" style="margin-top: 15px;">Опубликовать</button>
+        </div>
+      </div>
+
+      <div class="my-posts">
+        <h3>Мои посты</h3>
+        <div id="my-posts-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js?v=3"></script>
+</body>
+</html>

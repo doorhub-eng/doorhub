@@ -1,370 +1,41 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Блог / Платформа</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOORHUB - Лента</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="stylesheet" href="style.css?v=4">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-    <!-- Навигация -->
-    <nav class="navbar">
-        <div class="logo">DOORHUB</div>
-        <div class="burger-menu" onclick="toggleSidebar()">
-            <i class="fas fa-bars"></i>
-        </div>
-    </nav>
-
-    <!-- Боковая шторка -->
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <div class="sidebar" id="sidebar" style="display:flex; flex-direction:column;">
-        <div class="sidebar-header">
-            <h3>Меню</h3>
-            <span class="close-sidebar" onclick="toggleSidebar()">&times;</span>
-        </div>
-        
-        <!-- Меню для гостей -->
-        <div class="sidebar-content" id="sidebar-guest">
-            <button class="btn btn-outline full-width" onclick="toggleSidebar(); openModal('loginModal')">Вход</button>
-            <button class="btn btn-primary full-width" onclick="toggleSidebar(); openModal('registerModal')" style="margin-top: 10px;">Регистрация</button>
-        </div>
-
-        <!-- Меню для авторизованных -->
-        <div class="sidebar-content hidden" id="sidebar-user">
-            <div class="sidebar-user-info">
-                <img src="" id="user-avatar-display" class="user-avatar" style="display:none;" alt="avatar">
-                <span id="username-display">Привет, Admin</span>
-            </div>
-            <button class="btn btn-outline full-width" style="margin-top: 15px;" onclick="toggleSidebar()">Главная</button>
-            <button class="btn btn-outline full-width hidden" id="admin-panel-btn" style="margin-top: 10px;" onclick="toggleSidebar(); openModal('adminPanelModal')">Админ-панель</button>
-            <button class="btn btn-outline full-width" style="margin-top: 10px;" onclick="toggleSidebar(); openModal('profileModal')">Личный кабинет</button>
-            <button class="btn btn-outline full-width" style="margin-top: 10px;" onclick="toggleSidebar(); logout()">Выйти</button>
-        </div>
-
-        <!-- Статистика -->
-        <div class="sidebar-stats" style="margin-top:auto; padding-top:20px; border-top:1px solid #333;">
-            <button class="btn btn-outline full-width" onclick="showPublicUsers('online')" style="margin-bottom:10px; display:flex; justify-content:space-between;"><span>Онлайн:</span> <strong id="stat-online">0</strong></button>
-            <button class="btn btn-outline full-width" onclick="showPublicUsers('registered')" style="display:flex; justify-content:space-between;"><span>Зарегистрировано:</span> <strong id="stat-reg">0</strong></button>
-        </div>
+  <nav class="navbar">
+    <a href="index.html" class="logo">DOORHUB</a>
+    <div id="nav-auth-state">
+      <!-- Заполняется из JS -->
     </div>
+  </nav>
 
-    <!-- Контент -->
-    <main class="container">
-        <!-- Описание сайта -->
-        <div class="site-description" style="text-align: center; margin-bottom: 30px; padding: 20px; background: #1a1a1a; border-radius: 12px; border: 1px solid #333;">
-            <h1 style="font-size: 24px; margin-bottom: 10px; color: #fff;">DOORHUB</h1>
-            <p style="color: #aaa; font-size: 14px; line-height: 1.5;">твой главный источник актуальной инфы. свежие новости, авторские статьи и годная аналитика в одном месте. никакого лишнего инфошума — только суть.</p>
-        </div>
-
-        <div class="feed-header">
-            <h2>Последние записи</h2>
-            <div class="filters">
-                <button class="filter-btn active">Все</button>
-                <button class="filter-btn">Новости</button>
-                <button class="filter-btn">Статьи</button>
-                <button class="filter-btn">18+</button>
-            </div>
-        </div>
-        <div id="posts-container" class="posts-grid">
-            <!-- Посты будут рендериться здесь -->
-        </div>
-    </main>
-
-    <!-- Футер -->
-    <footer style="text-align: center; padding: 20px; border-top: 1px solid #333; margin-top: 40px; color: #888; font-size: 14px;">
-        <p style="margin-bottom: 10px;">&copy; 2026 DOORHUB. Все права защищены.</p>
-        <div style="display: flex; justify-content: center; gap: 15px;">
-            <a href="https://t.me/door_hub" target="_blank" style="color: #0088cc; text-decoration: none; font-size: 20px;"><i class="fab fa-telegram"></i></a>
-            <a href="https://www.youtube.com/@door_hub" target="_blank" style="color: #ff0000; text-decoration: none; font-size: 20px;"><i class="fab fa-youtube"></i></a>
-        </div>
-    </footer>
-
-    <!-- Админская кнопка "+" -->
-    <button class="admin-fab hidden" id="admin-fab" onclick="openModal('createPostModal')">
-        <i class="fas fa-plus"></i>
-    </button>
-
-    <!-- МОДАЛКИ -->
-
-    <!-- Список пользователей (Паблик) -->
-    <div id="publicUsersModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('publicUsersModal')">&times;</span>
-            <h2 id="public-users-title">Пользователи</h2>
-            <div id="public-users-list" style="margin-top:15px; display:flex; flex-direction:column; gap:10px; max-height: 400px; overflow-y: auto;"></div>
-        </div>
+  <main class="container">
+    <div class="feed-header">
+      <h2>Свежие новости и статьи</h2>
+      <div class="feed-controls">
+        <input type="text" id="search-input" placeholder="Поиск постов...">
+        <select id="sort-select">
+          <option value="new">Сначала новые</option>
+          <option value="popular">Сначала популярные</option>
+          <option value="old">Сначала старые</option>
+        </select>
+      </div>
     </div>
-
-    <!-- Вход -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('loginModal')">&times;</span>
-            <h2>С возвращением</h2>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="input-group">
-                    <label>Логин или Email</label>
-                    <input type="text" id="login-identifier" required placeholder="admin@mail.ru или логин">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" id="login-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn btn-primary full-width">Войти</button>
-                <p class="switch-form">Нет аккаунта? <a href="#" onclick="switchModal('loginModal', 'registerModal')">Создать</a></p>
-            </form>
-        </div>
+    
+    <div id="posts-feed" class="posts-grid">
+      <p class="loading">Загрузка постов...</p>
     </div>
+  </main>
 
-    <!-- Подтверждение кода ТГ для Админа -->
-    <div id="adminAuthModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('adminAuthModal')">&times;</span>
-            <h2>Проверка безопасности</h2>
-            <p style="color:#aaa; font-size:14px; margin-bottom:15px;">Мы отправили секретный код в вашего Telegram бота.</p>
-            <form id="adminAuthForm" onsubmit="verifyAdminCode(event)">
-                <div class="input-group">
-                    <label>Код из бота</label>
-                    <input type="text" id="admin-auth-code" required placeholder="0000" maxlength="4" style="text-align:center; font-size:24px; letter-spacing: 5px;">
-                </div>
-                <button type="submit" class="btn btn-primary full-width">Подтвердить</button>
-            </form>
-        </div>
-    </div>
-    <!-- Регистрация -->
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('registerModal')">&times;</span>
-            <h2>Новый аккаунт</h2>
-            <form id="registerForm" onsubmit="handleRegister(event)">
-                <div class="input-group">
-                    <label>Имя пользователя</label>
-                    <input type="text" id="reg-name" required placeholder="JohnDoe">
-                </div>
-                <div class="input-group">
-                    <label>Логин или Email</label>
-                    <input type="text" id="reg-identifier" required placeholder="mail@example.com или логин">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" id="reg-password" required placeholder="Создайте пароль">
-                </div>
-                <button type="submit" class="btn btn-primary full-width">Зарегистрироваться</button>
-                <p class="switch-form">Уже с нами? <a href="#" onclick="switchModal('registerModal', 'loginModal')">Войти</a></p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Установка аватарки (Шаг после реги) -->
-    <div id="avatarStepModal" class="modal">
-        <div class="modal-content">
-            <h2>Шаг 2: Ваша аватарка</h2>
-            <p style="color:#888; margin-bottom: 20px; font-size: 14px;">Поставьте аватарку, чтобы выделяться среди других пользователей.</p>
-            <form id="avatarStepForm" onsubmit="handleAvatarStepSetup(event)">
-                <div class="input-group">
-                    <label>Выберите файл</label>
-                    <input type="file" id="step-avatar" accept="image/*" required>
-                </div>
-                <div class="form-actions" style="flex-direction: column; gap: 10px;">
-                    <button type="submit" class="btn btn-primary full-width">Сохранить аватарку</button>
-                    <button type="button" class="btn btn-outline full-width" onclick="skipAvatarStep()">Пропустить</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Создание поста -->
-    <div id="createPostModal" class="modal">
-        <div class="modal-content large">
-            <span class="close" onclick="closeModal('createPostModal')">&times;</span>
-            <h2>Создать публикацию</h2>
-            <form id="createPostForm" onsubmit="handleCreatePost(event)">
-                <div class="input-group">
-                    <label>Заголовок поста</label>
-                    <input type="text" id="post-title" required placeholder="О чем хотите рассказать?">
-                </div>
-                
-                <div class="form-row">
-                    <div class="input-group">
-                        <label>Категория</label>
-                        <select id="post-category" onchange="toggleBoostyField(this.value)">
-                            <option value="Новости">Новости</option>
-                            <option value="Статьи">Статьи</option>
-                            <option value="Обзоры">Обзоры</option>
-                            <option value="Разное">Разное</option>
-                            <option value="18+">18+ (Платный)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Загрузить медиа (фото/видео)</label>
-                        <input type="file" id="post-image" accept="image/*,video/mp4,video/webm,video/ogg">
-                    </div>
-                </div>
-
-                <div class="input-group hidden" id="boosty-link-group" style="margin-bottom: 15px;">
-                    <label>Ссылка на пост в Boosty</label>
-                    <input type="url" id="post-boosty-link" placeholder="https://boosty.to/твой_профиль/post/...">
-                </div>
-
-                <div class="input-group">
-                    <label>Содержимое (тизер для 18+)</label>
-                    <div class="editor-toolbar">
-                        <button type="button" onclick="formatText('<b>', '</b>')"><i class="fas fa-bold"></i></button>
-                        <button type="button" onclick="formatText('<i>', '</i>')"><i class="fas fa-italic"></i></button>
-                        <button type="button" onclick="insertLink()"><i class="fas fa-link"></i></button>
-                        <button type="button" onclick="formatText('<ul>\n<li>', '</li>\n</ul>')"><i class="fas fa-list"></i></button>
-                        <button type="button" onclick="insertImage()"><i class="fas fa-image"></i></button>
-                    </div>
-                    <textarea id="post-content" rows="8" required placeholder="Текст публикации..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('createPostModal')">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Опубликовать</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Редактирование поста -->
-    <div id="editPostModal" class="modal">
-        <div class="modal-content large">
-            <span class="close" onclick="closeModal('editPostModal')">&times;</span>
-            <h2>Редактировать публикацию</h2>
-            <form id="editPostForm" onsubmit="handleEditPost(event)">
-                <div class="input-group">
-                    <label>Заголовок поста</label>
-                    <input type="text" id="edit-post-title" required>
-                </div>
-                
-                <div class="form-row">
-                    <div class="input-group">
-                        <label>Категория</label>
-                        <select id="edit-post-category" onchange="toggleEditBoostyField(this.value)">
-                            <option value="Новости">Новости</option>
-                            <option value="Статьи">Статьи</option>
-                            <option value="Обзоры">Обзоры</option>
-                            <option value="Разное">Разное</option>
-                            <option value="18+">18+ (Платный)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label>Изменить медиа (фото/видео)</label>
-                        <input type="file" id="edit-post-image" accept="image/*,video/mp4,video/webm,video/ogg">
-                    </div>
-                </div>
-
-                <div class="input-group hidden" id="edit-boosty-link-group" style="margin-bottom: 15px;">
-                    <label>Ссылка на пост в Boosty</label>
-                    <input type="url" id="edit-post-boosty-link">
-                </div>
-
-                <div class="input-group">
-                    <label>Содержимое</label>
-                    <textarea id="edit-post-content" rows="8" required></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-outline" onclick="closeModal('editPostModal')">Отмена</button>
-                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Профиль -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('profileModal')">&times;</span>
-            <h2>Настройки профиля</h2>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img id="prof-current-avatar" src="" style="width: 120px; height: 120px; object-fit: cover; border: 2px solid #444; display: none; margin: 0 auto;">
-            </div>
-            <form id="profileForm" onsubmit="handleSaveProfile(event)">
-                <div class="input-group">
-                    <label>Никнейм</label>
-                    <input type="text" id="prof-name">
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="prof-email">
-                </div>
-                <div class="input-group">
-                    <label>Телефон</label>
-                    <input type="tel" id="prof-phone" placeholder="+7 (999) 000-00-00">
-                </div>
-                <div class="input-group">
-                    <label>Загрузить аватарку</label>
-                    <input type="file" id="prof-avatar" accept="image/*">
-                </div>
-                <div class="input-group" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-                    <input type="checkbox" id="prof-2fa" style="width: auto; margin-bottom: 0;">
-                    <label style="margin-bottom: 0;">Включить 2FA аутентификацию</label>
-                </div>
-                <button type="submit" class="btn btn-primary full-width">Сохранить</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Админ панель -->
-    <div id="adminPanelModal" class="modal">
-        <div class="modal-content large">
-            <span class="close" onclick="closeModal('adminPanelModal')">&times;</span>
-            <h2>Панель администратора</h2>
-            <div class="admin-dashboard">
-                <div class="stat-card">
-                    <h3>Всего постов</h3>
-                    <p id="admin-stat-posts">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Всего лайков</h3>
-                    <p id="admin-stat-likes">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Комментариев</h3>
-                    <p id="admin-stat-comments">0</p>
-                </div>
-            </div>
-            
-            <div class="admin-settings" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
-                <h3 style="margin-bottom: 10px;">Все пользователи</h3>
-                <div id="admin-users-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
-                
-                <h3 style="margin-bottom: 10px;">Редакторы</h3>
-                <div id="admin-editors-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
-                
-                <h3 style="margin-bottom: 10px;">Забаненные</h3>
-                <div id="admin-banned-list" style="max-height: 250px; overflow-y:auto; margin-bottom: 20px; display:flex; flex-direction:column; gap:5px;"></div>
-            </div>
-
-            <p class="admin-notice">Управление контентом доступно прямо из ленты. Чтобы закрепить или удалить пост, используйте иконки в правом верхнем углу карточки.</p>
-        </div>
-    </div>
-
-    <!-- Окно бана -->
-    <div id="bannedModal" class="modal" style="z-index: 9999; background-color: rgba(0,0,0,0.95);">
-        <div class="modal-content" style="text-align: center; border: 2px solid #ff4444;">
-            <h2 style="color: #ff4444; font-size: 32px; margin-bottom: 20px;">ВЫ ЗАБАНЕНЫ</h2>
-            <p style="font-size: 18px; margin-bottom: 30px;">Доступ к DOORHUB ограничен администрацией.</p>
-            <button onclick="logoutAndCloseBan()" class="btn">Выйти из аккаунта</button>
-        </div>
-    </div>
-
-    <!-- Окно управления пользователем (Админ) -->
-    <div id="userActionModal" class="modal">
-        <div class="modal-content" style="max-width: 300px; text-align: center;">
-            <span class="close" onclick="closeModal('userActionModal')">&times;</span>
-            <h2 id="user-action-name" style="margin-bottom: 20px;">Пользователь</h2>
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-                <button id="btn-user-ban" onclick="executeUserAction('ban')" class="btn" style="background: transparent; border: 1px solid #ff4444; color: #ff4444;">Забанить</button>
-                <button id="btn-user-mute" onclick="executeUserAction('mute')" class="btn" style="background: transparent; border: 1px solid #ffaa00; color: #ffaa00;">Выдать мут</button>
-                <button id="btn-user-editor" onclick="executeUserAction('editor')" class="btn" style="background: transparent; border: 1px solid #00cc66; color: #00cc66;">Дать права редактора</button>
-                <button onclick="executeUserAction('delete')" class="btn" style="background: #ff4444; color: #fff;">Удалить аккаунт</button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module" src="app.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

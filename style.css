@@ -6,7 +6,7 @@
     --text-main: #ffffff;
     --text-muted: #999999;
     --border: #333333;
-    --radius: 8px; /* Слегка закруглили */
+    --radius: 0px; /* Убрали все скругления - полный квадрат */
 }
 
 * {
@@ -43,26 +43,7 @@ body {
     letter-spacing: 2px;
 }
 
-/* Десктопное меню */
-.desktop-menu {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-#desktop-guest {
-    display: flex;
-    gap: 10px;
-}
-
-.desktop-menu .btn {
-    padding: 0.4rem 1rem;
-    font-size: 0.85rem;
-    margin: 0;
-}
-
 .burger-menu {
-    display: none; /* На ПК скрыто */
     font-size: 1.5rem;
     cursor: pointer;
     color: var(--text-main);
@@ -74,11 +55,6 @@ body {
 }
 
 /* Боковая шторка */
-@media (min-width: 769px) {
-    .sidebar, .sidebar-overlay {
-        display: none !important;
-    }
-}
 .sidebar-overlay {
     position: fixed;
     inset: 0;
@@ -217,21 +193,13 @@ body {
     padding: 0 5%;
 }
 
-.feed-controls {
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
 .feed-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
 }
 
 .feed-header h2 {
@@ -240,59 +208,9 @@ body {
     margin-bottom: 0;
 }
 
-.search-bar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.search-bar input {
-    width: auto;
-    padding: 0.5rem 1rem;
-    min-width: 200px;
-}
-
 .filters {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap;
-}
-
-.post-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.post-date {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-}
-
-.post-edited {
-    font-size: 0.7rem;
-    color: #777;
-    font-style: italic;
-    margin-left: 5px;
-}
-
-.admin-user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background: #1a1a1a;
-    border: 1px solid var(--border);
-}
-
-.admin-user-item span {
-    font-weight: bold;
-}
-
-.admin-user-item .btn {
-    padding: 4px 8px;
-    font-size: 0.75rem;
 }
 
 .filter-btn {
@@ -653,14 +571,6 @@ input:focus, textarea:focus, select:focus {
 
 /* Адаптив для мобильных устройств */
 @media (max-width: 768px) {
-    .desktop-menu {
-        display: none !important;
-    }
-    
-    .burger-menu {
-        display: block;
-    }
-
     .navbar {
         padding: 15px;
     }

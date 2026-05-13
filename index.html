@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOORHUB - новости и блог</title>
+    <title>Блог / Платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -12,25 +12,6 @@
     <!-- Навигация -->
     <nav class="navbar">
         <div class="logo">DOORHUB</div>
-        
-        <!-- Десктопное меню -->
-        <div class="desktop-menu" id="desktop-menu">
-            <!-- Гость -->
-            <div id="desktop-guest">
-                <button class="btn btn-outline" onclick="openModal('loginModal')">Вход</button>
-                <button class="btn btn-primary" onclick="openModal('registerModal')">Регистрация</button>
-            </div>
-            <!-- Юзер -->
-            <div id="desktop-user" class="hidden" style="display: flex; align-items: center; gap: 15px;">
-                <div class="user-info-mini" style="display: flex; align-items: center; gap: 10px;">
-                    <span id="desktop-username" style="font-weight: bold; text-transform: uppercase; font-size: 0.9rem;">Admin</span>
-                </div>
-                <button class="btn btn-outline hidden" id="desktop-admin-btn" onclick="openModal('adminPanelModal')">Админ-панель</button>
-                <button class="btn btn-outline" onclick="openModal('profileModal')">Профиль</button>
-                <button class="btn btn-outline" onclick="logout()">Выйти</button>
-            </div>
-        </div>
-
         <div class="burger-menu" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>
         </div>
@@ -77,25 +58,13 @@
             <p style="color: #aaa; font-size: 14px; line-height: 1.5;">твой главный источник актуальной инфы. свежие новости, авторские статьи и годная аналитика в одном месте. никакого лишнего инфошума — только суть.</p>
         </div>
 
-        <div class="feed-controls" style="margin-bottom: 20px;">
-            <div class="feed-header" style="border-bottom: none; margin-bottom: 10px;">
-                <h2>Последние записи</h2>
-                <div class="search-bar" style="display: flex; gap: 10px;">
-                    <input type="text" id="search-title" placeholder="Поиск по названию..." oninput="filterPosts()" style="width: auto;">
-                    <input type="date" id="search-date" onchange="filterPosts()" style="width: auto;">
-                </div>
-            </div>
-            <div class="sort-bar" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                <button class="filter-btn active" id="sort-new" onclick="setSort('new', this)">Сначала новые</button>
-                <button class="filter-btn" id="sort-popular" onclick="setSort('popular', this)">Сначала популярные</button>
-            </div>
-                </div>
-            </div>
+        <div class="feed-header">
+            <h2>Последние записи</h2>
             <div class="filters">
-                <button class="filter-btn active" onclick="setCategory('Все', this)">Все</button>
-                <button class="filter-btn" onclick="setCategory('Новости', this)">Новости</button>
-                <button class="filter-btn" onclick="setCategory('Статьи', this)">Статьи</button>
-                <button class="filter-btn" onclick="setCategory('18+', this)">18+</button>
+                <button class="filter-btn active">Все</button>
+                <button class="filter-btn">Новости</button>
+                <button class="filter-btn">Статьи</button>
+                <button class="filter-btn">18+</button>
             </div>
         </div>
         <div id="posts-container" class="posts-grid">
@@ -286,18 +255,11 @@
                     </div>
                 </div>
 
-                <div class="input-group">
-                    <label>Email / Логин (нельзя изменить)</label>
-                    <input type="text" id="prof-email" readonly style="opacity: 0.7;">
+                <div class="input-group hidden" id="edit-boosty-link-group" style="margin-bottom: 15px;">
+                    <label>Ссылка на пост в Boosty</label>
+                    <input type="url" id="edit-post-boosty-link">
                 </div>
-                <div class="input-group">
-                    <label>Новый пароль</label>
-                    <input type="password" id="prof-password" placeholder="Оставьте пустым, если не меняете">
-                </div>
-                <div class="input-group">
-                    <label>Телефон</label>
-                    <input type="tel" id="prof-phone" placeholder="+7 (999) 000-00-00">
-                </div>
+
                 <div class="input-group">
                     <label>Содержимое</label>
                     <textarea id="edit-post-content" rows="8" required></textarea>
@@ -387,12 +349,6 @@
             <p style="font-size: 18px; margin-bottom: 30px;">Доступ к DOORHUB ограничен администрацией.</p>
             <button onclick="logoutAndCloseBan()" class="btn">Выйти из аккаунта</button>
         </div>
-    </div>
-
-    <!-- Просмотр картинки на весь экран -->
-    <div id="imageModal" class="modal" style="z-index: 9999; background: rgba(0,0,0,0.9);">
-        <span class="close" onclick="closeModal('imageModal')" style="color: #fff; font-size: 40px; top: 20px; right: 30px;">&times;</span>
-        <img id="fullscreen-image" src="" style="max-width: 90vw; max-height: 90vh; object-fit: contain; margin: auto; display: block;">
     </div>
 
     <!-- Окно управления пользователем (Админ) -->
